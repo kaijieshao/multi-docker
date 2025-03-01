@@ -1,5 +1,6 @@
-sudo: required
 dist: focal
+sudo: required
+language: generic
 
 services:
   - docker
@@ -15,7 +16,9 @@ after_success:
   - docker build -t kaijieshao/multi-nginx ./nginx
   - docker build -t kaijieshao/multi-server ./server
   - docker build -t kaijieshao/multi-worker ./worker
+  # Log in to the docker CLI
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # Take those images and push them to docker hub
   - docker push kaijieshao/multi-client
   - docker push kaijieshao/multi-nginx
   - docker push kaijieshao/multi-server
@@ -28,5 +31,7 @@ deploy:
   env: 'MultiDocker-env'
   bucket_name: 'elasticbeanstalk-us-east-1-156041423344'
   bucket_path: 'docker-multi'
-  access_key_id: '$AWS_ACCESS_KEY'
-  secret_access_key: '$AWS_SECRET_KEY'
+  on:
+    branch: main
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY
