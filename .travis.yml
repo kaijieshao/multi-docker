@@ -1,4 +1,5 @@
 sudo: required
+dist: focal
 
 services:
   - docker
@@ -9,25 +10,23 @@ before_install:
 script:
   - docker run -e CI=true kaijieshao/react-test npm test
 
-deploy:
-  provider: elasticbeanstalk
-  region: "us-east-1"
-  app: "multi-docker"
-  env: "MultiDocker-env"
-  bucket_name: "elasticbeanstalk-us-east-1-156041423344"
-  bucket_path: "docker-multi"
-  access_key_id: "$AWS_ACCESS_KEY"
-  secret_access_key: "$AWS_SECRET_KEY"
-
 after_success:
   - docker build -t kaijieshao/multi-client ./client
   - docker build -t kaijieshao/multi-nginx ./nginx
   - docker build -t kaijieshao/multi-server ./server
   - docker build -t kaijieshao/multi-worker ./worker
-  # Log in to the Docker CLI
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
-  # Take those images and push them to the Docker Hub
   - docker push kaijieshao/multi-client
   - docker push kaijieshao/multi-nginx
   - docker push kaijieshao/multi-server
   - docker push kaijieshao/multi-worker
+
+deploy:
+  provider: elasticbeanstalk
+  region: 'us-east-1'
+  app: 'multi-docker'
+  env: 'MultiDocker-env'
+  bucket_name: 'elasticbeanstalk-us-east-1-156041423344'
+  bucket_path: 'docker-multi'
+  access_key_id: '$AWS_ACCESS_KEY'
+  secret_access_key: '$AWS_SECRET_KEY'
